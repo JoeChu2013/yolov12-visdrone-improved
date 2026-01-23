@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+
+# PyCharm / VSCode
+.idea/
+.vscode/
+*.swp
+
+# Datasets (Too large for GitHub)
+datasets/
+ultralytics/cfg/datasets/VisDrone/
+
+# Training Runs (Too large, keep logs if needed but exclude weights)
+runs/
+!runs/**/results.csv
+!runs/**/args.yaml
+!runs/**/results.png
+!runs/**/confusion_matrix.png
+# Exclude weights specifically
+*.pt
+*.pth
+!yolov12n.pt # Optional: keep if small, but generally gitignore weights
+
+# Local Logs
+logs/
+*.log
