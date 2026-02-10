@@ -11,24 +11,20 @@ def is_completed(csv_path, target_epochs=50):
         df = pd.read_csv(csv_path)
         if df.empty: return False
         df.columns = [c.strip() for c in df.columns]
-        last_epoch = df['epoch'].iloc[-1]
-        # CSV epochs are 1-based usually in Ultralytics logs if using 'epoch' column? 
-        # Actually they are 0-based or 1-based depending on version. 
-        # Let's assume if we have 50 rows it's close enough.
         return len(df) >= target_epochs
     except:
         return False
 
 def main():
-    # 3 Learning Rates to compare
-    lrs = [0.01, 0.001, 0.0001]
+    # 4 Learning Rates to compare (Replaced 0.1 with 0.005)
+    lrs = [0.01, 0.005, 0.001, 0.0001]
     
     model_cfg = "ultralytics/cfg/models/v12/yolov12-p2-improved.yaml"
     device = "0" if torch.cuda.is_available() else "cpu"
     
     results = {}
     
-    print("=== Starting Learning Rate Comparison Experiment (Resume Supported) ===")
+    print("=== Starting Refined Learning Rate Comparison (0.01, 0.005, 0.001, 0.0001) ===")
     
     for lr in lrs:
         name = f"lr_experiment_{lr}"
@@ -51,7 +47,6 @@ def main():
             try:
                 model = YOLO(last_pt)
                 model.train(resume=True)
-                # After resume, load results
                 if os.path.exists(csv_path):
                     results[lr] = pd.read_csv(csv_path)
                 continue
@@ -82,7 +77,7 @@ def main():
 
     # Plotting
     if results:
-        print("\nGenerating comparison plots...")
+        print("\nGenerating refined comparison plots...")
         plt.figure(figsize=(12, 6))
         
         # mAP@0.5 Convergence
@@ -112,8 +107,8 @@ def main():
         plt.grid(True, alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig('lr_convergence_comparison.png', dpi=300)
-        print("Comparison plot saved to lr_convergence_comparison.png")
+        plt.savefig('lr_convergence_comparison_refined.png', dpi=300)
+        print("Comparison plot saved to lr_convergence_comparison_refined.png")
 
 if __name__ == "__main__":
     main()
