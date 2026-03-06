@@ -28,12 +28,45 @@ To surpass SOTA and maximize performance for drone imagery, we decided to implem
 - **Change**: Added a high-resolution detection head (stride 4) to detect tiny objects.
 - **Expectation**: This should provide the highest mAP, potentially exceeding 35-38%.
 
-## Current Status
-- **Training**: Started `train_final_p2.py` for the P2 Improved model.
-- **Automation**: Created `run_and_sync.bat` to automatically train, evaluate, and push results to Git.
+## Session Summary (Date: 2026-03-06)
+
+### 4. P2 Head Results (SOTA Achieved!)
+After adding the P2 Head, our model performance skyrocketed:
+- **Baseline YOLOv12n**: 28.32% mAP
+- **Improved (BiFPN+CA+SIoU)**: 30.55% mAP
+- **Improved + P2 Head (Ours)**: **34.51% mAP** (+6.19% improvement)
+
+We generated a comprehensive comparison table (`model_comparison_final.csv`) and visual charts (`final_visual_matrix.png`) showing our model outperforming all baselines (YOLOv8n-v11n).
+
+### 5. Learning Rate Ablation Study
+We investigated the impact of learning rate (LR) on convergence:
+- **Experiments**: LR = 0.01, 0.005, 0.001, 0.0001
+- **Findings**:
+    - `0.01`: Converged fastest, achieved ~34.5% mAP.
+    - `0.005`: Slightly slower but stable.
+    - `0.001`: Significantly slower convergence.
+    - `0.1`: Initially tested but abandoned due to divergence/poor performance (~20% mAP). Replaced with 0.005.
+
+### 6. New Ablation Study (No SIoU, focus on P2)
+We updated the ablation study to specifically isolate the contribution of the P2 Head without SIoU (using standard CIoU).
+New results in `ablation_study_final_v2.csv`:
+- **+ P2 (New)**: Adding *only* the P2 head boosted mAP from 28.29% (Baseline) to **32.41%**. This proves P2 is the most critical factor for small object detection.
+- **+ BiFPN + CA + P2**: Combining all modules yields the best result (**34.51%**).
+
+### 7. Tiny P2P3 Focused Model (Ongoing Experiment)
+We designed a new lightweight architecture: **YOLOv12-Tiny-P2P3-Focused**.
+- **Goal**: Maximize efficiency for drone imagery by removing redundant large-object detection heads.
+- **Changes**:
+    - **Removed P4 & P5 Heads**: No detection for large objects (not needed for VisDrone).
+    - **Asymmetric BiFPN**: Kept top-down path for semantic context, but removed bottom-up path for P4/P5 to save compute.
+    - **Focus**: Computation concentrated on P2 (Tiny) and P3 (Small) layers.
+- **Status**: Currently training via `run_sequential_tasks.bat`.
 
 ## How to Continue (From Home)
-1.  **Pull/Clone** the repository.
-2.  Check `runs/detect/YOLOv12-P2-Improved` for results.
-3.  The final comparison table will be in `model_comparison_final.csv`.
-4.  If training was interrupted, run `run_and_sync.bat` to resume.
+1.  **Pull Repository**: `git pull origin main`
+2.  **Check Training**:
+    - Verify if `runs/detect/YOLOv12-Tiny-P2P3-Focused` has completed.
+    - Check `ablation_study_final_v2.csv` for the latest P2 ablation data.
+3.  **Next Steps**:
+    - Analyze the trade-off between speed and accuracy for the Tiny P2P3 model.
+    - Finalize the paper with the generated charts in the root directory.

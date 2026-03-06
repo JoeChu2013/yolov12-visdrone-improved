@@ -1,0 +1,56 @@
+# YOLOv12 with P2 Head Only
+nc: 80 # number of classes
+scales: # model compound scaling constants
+  # [depth, width, max_channels]
+  n: [0.50, 0.25, 1024]
+  s: [0.50, 0.50, 1024]
+  m: [0.50, 1.00, 512]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.50, 512]
+
+# YOLO12-turbo backbone
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv,  [64, 3, 2]] # 0
+  - [-1, 1, Conv,  [128, 3, 2, 1, 2]] # 1
+  - [-1, 2, C3k2,  [256, False, 0.25]] # 2 (P2)
+  - [-1, 1, Conv,  [256, 3, 2, 1, 4]] # 3 (P3)
+  - [-1, 2, C3k2,  [512, False, 0.25]] # 4
+  - [-1, 1, Conv,  [512, 3, 2]] # 5 (P4)
+  - [-1, 4, A2C2f, [512, True, 4]] # 6
+  - [-1, 1, Conv,  [1024, 3, 2]] # 7 (P5)
+  - [-1, 4, A2C2f, [1024, True, 1]] # 8
+
+# YOLO12-turbo head with P2
+head:
+  # P5 -> P4
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 9
+  - [[-1, 6], 1, Concat, [1]] # 10 cat backbone P4
+  - [-1, 2, A2C2f, [512, False, -1]] # 11 (P4_out)
+
+  # P4 -> P3
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 12
+  - [[-1, 4], 1, Concat, [1]] # 13 cat backbone P3
+  - [-1, 2, A2C2f, [256, False, -1]] # 14 (P3_out)
+
+  # P3 -> P2 (New)
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 15
+  - [[-1, 2], 1, Concat, [1]] # 16 cat backbone P2
+  - [-1, 2, C3k2, [256, False, 0.25]] # 17 (P2_out)
+
+  # P2 -> P3
+  - [-1, 1, Conv, [256, 3, 2]] # 18
+  - [[-1, 14], 1, Concat, [1]] # 19
+  - [-1, 2, A2C2f, [256, False, -1]] # 20 (P3_final)
+
+  # P3 -> P4
+  - [-1, 1, Conv, [256, 3, 2]] # 21
+  - [[-1, 11], 1, Concat, [1]] # 22
+  - [-1, 2, A2C2f, [512, False, -1]] # 23 (P4_final)
+
+  # P4 -> P5
+  - [-1, 1, Conv, [512, 3, 2]] # 24
+  - [[-1, 8], 1, Concat, [1]] # 25
+  - [-1, 2, C3k2, [1024, True]] # 26 (P5_final)
+
+  - [[17, 20, 23, 26], 1, Detect, [nc]] # Detect(P2, P3, P4, P5)
