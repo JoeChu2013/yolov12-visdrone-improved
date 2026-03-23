@@ -90,16 +90,23 @@ def main():
             "components": ["✓", "✓", "-"]
         },
         {
-            "name": "+ BiFPN + CA + P2 (Ours)",
+            "name": "+ BiFPN + CA + P2 (Symmetric)",
             "csv": "runs/detect/YOLOv12-P2-Improved/results.csv",
             "weights": "runs/detect/YOLOv12-P2-Improved/weights/best.pt",
             "yaml": "ultralytics/cfg/models/v12/yolov12-p2-improved.yaml",
             "components": ["✓", "✓", "✓"]
+        },
+        {
+            "name": "+ Asym-BiFPN + CA + P2 (Tiny)",
+            "csv": "runs/detect/YOLOv12-Tiny-P2P3-Focused/results.csv",
+            "weights": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt",
+            "yaml": "ultralytics/cfg/models/v12/yolov12-tiny-p2p3.yaml",
+            "components": ["Asym", "✓", "✓"]
         }
     ]
 
-    print(f"{'Model':<30} | {'BiFPN':<6} | {'CA':<6} | {'P2':<6} | {'Params (M)':<10} | {'FPS':<8} | {'mAP@0.5':<10} | {'Precision':<10} | {'Recall':<10}")
-    print("-" * 120)
+    print(f"{'Model':<35} | {'BiFPN':<10} | {'CA':<6} | {'P2':<6} | {'Params (M)':<10} | {'FPS':<8} | {'mAP@0.5':<10} | {'Precision':<10} | {'Recall':<10}")
+    print("-" * 125)
 
     rows = []
     
@@ -139,7 +146,7 @@ def main():
         fps_str = f"{fps:.1f}"
         
         bifpn, ca, p2 = exp["components"]
-        print(f"{exp['name']:<30} | {bifpn:<6} | {ca:<6} | {p2:<6} | {params_m:<10} | {fps_str:<8} | {map50:<10} | {p:<10} | {r:<10}")
+        print(f"{exp['name']:<35} | {bifpn:<10} | {ca:<6} | {p2:<6} | {params_m:<10} | {fps_str:<8} | {map50:<10} | {p:<10} | {r:<10}")
         
         rows.append({
             "Model": exp["name"],
