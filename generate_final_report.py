@@ -28,8 +28,8 @@ def main():
         "YOLOv10n": "yolov10n.pt",
         "YOLOv11n": "yolo11n.pt",
         "YOLOv12n (Base)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
-        "YOLOv12-Improved (BiFPN+CA+SIoU)": "runs/detect/ablation_bifpn_ca_siou/weights/best.pt",
-        "YOLOv12-P2-Improved (Ours)": "runs/detect/YOLOv12-P2-Improved/weights/best.pt"
+        "YOLOv12-P2-Improved (Symmetric)": "runs/detect/YOLOv12-P2-Improved/weights/best.pt",
+        "YOLOv12-Tiny-P2P3 (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     }
     
     device = "0" if torch.cuda.is_available() else "cpu"
