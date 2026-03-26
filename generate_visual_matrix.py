@@ -8,12 +8,14 @@ from matplotlib import font_manager
 
 def main():
     # 1. Models to Compare (Rows)
+    # Based on the user's latest request, comparing YOLOv8n, v9t, v10n, v11n, Base, and Tiny
     models_config = {
         "YOLOv8n": "yolov8n.pt",
+        "YOLOv9t": "yolov9t.pt",
         "YOLOv10n": "yolov10n.pt",
-        "YOLOv12n (Baseline)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
-        "Improved YOLOv12": "runs/detect/YOLOv12-P2-Improved/weights/best.pt",
-        "Tiny P2P3": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
+        "YOLOv11n": "yolo11n.pt",
+        "YOLOv12n (Base)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
+        "YOLOv12-Tiny (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     }
 
     # 2. Select 4 Images for different scenarios (Columns)
