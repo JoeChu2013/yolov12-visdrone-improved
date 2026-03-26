@@ -11,8 +11,9 @@ def main():
     models_config = {
         "YOLOv8n": "yolov8n.pt",
         "YOLOv10n": "yolov10n.pt",
-        "YOLOv12n": "runs/detect/ablation_baseline_ciou/weights/best.pt",
-        "Improved YOLOv12": "runs/detect/YOLOv12-P2-Improved/weights/best.pt"
+        "YOLOv12n (Baseline)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
+        "Improved YOLOv12": "runs/detect/YOLOv12-P2-Improved/weights/best.pt",
+        "Tiny P2P3": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     }
 
     # 2. Select 4 Images for different scenarios (Columns)
