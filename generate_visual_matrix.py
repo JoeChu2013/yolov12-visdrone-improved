@@ -15,7 +15,7 @@ def main():
         "YOLOv10n": "yolov10n.pt",
         "YOLOv11n": "yolo11n.pt",
         "YOLOv12n (Base)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
-        "YOLOv12-Tiny (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
+        "YOLOv12n-UAV (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     }
 
     # 2. Select 4 Images for different scenarios (Columns)
