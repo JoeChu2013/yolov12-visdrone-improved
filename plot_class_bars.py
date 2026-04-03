@@ -11,7 +11,7 @@ def main():
         return
 
     # Filter out "Improvement" row if present
-    df = df[df['Model'] != 'Improvement (Final vs Base)']
+    df = df[df['Model'] != 'Improvement (Tiny vs Base)']
     
     # Classes
     classes = [c for c in df.columns if c not in ['Model', 'mAP@0.5']]
@@ -20,9 +20,9 @@ def main():
     models = df['Model'].tolist()
     # Shorten model names for legend
     short_names = {
-        "YOLOv12n (Baseline)": "Baseline",
-        "YOLOv12-Improved (BiFPN+CA)": "Intermediate",
-        "YOLOv12-P2-Improved (Final)": "Ours (P2)"
+        "YOLOv12n (Baseline)": "YOLOv12n (Base)",
+        "YOLOv12-P2-Improved (Symmetric)": "YOLOv12-Improved",
+        "YOLOv12-Tiny-P2P3 (Ours)": "YOLOv12-Tiny (Ours)"
     }
     models = [short_names.get(m, m) for m in models]
     

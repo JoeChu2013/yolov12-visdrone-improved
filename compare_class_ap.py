@@ -6,8 +6,8 @@ def main():
     # 1. Models to compare
     models = {
         "YOLOv12n (Baseline)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
-        "YOLOv12-Improved (BiFPN+CA)": "runs/detect/ablation_bifpn_ca_siou/weights/best.pt",
-        "YOLOv12-P2-Improved (Final)": "runs/detect/YOLOv12-P2-Improved/weights/best.pt"
+        "YOLOv12-P2-Improved (Symmetric)": "runs/detect/YOLOv12-P2-Improved/weights/best.pt",
+        "YOLOv12-Tiny-P2P3 (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     }
     
     # VisDrone Classes
@@ -75,20 +75,23 @@ def main():
         if col != "Model":
             df[col] = df[col].apply(lambda x: f"{x:.2%}")
             
-    # Calculate Improvement (Final - Baseline)
+    # Calculate Improvement (Tiny vs Base)
     if len(df) >= 3:
         baseline = df.iloc[0]
         final = df.iloc[2]
         
-        diff_row = {"Model": "Improvement (Final vs Base)"}
+        diff_row = {"Model": "Improvement (Tiny vs Base)"}
         for col in df.columns:
             if col != "Model":
                 # Convert back to float for subtraction
                 val_base = float(baseline[col].strip('%'))
                 val_final = float(final[col].strip('%'))
                 diff = val_final - val_base
-                diff_row[col] = f"+{diff:.2f}%"
+                sign = "+" if diff > 0 else ""
+                diff_row[col] = f"{sign}{diff:.2f}%"
         
+        # We append directly instead of concat to avoid index issues with the way it was structured before,
+        # but let's use a cleaner concat:
         df = pd.concat([df, pd.DataFrame([diff_row])], ignore_index=True)
 
     print("\n=== Per-Class AP@0.5 Comparison ===")
