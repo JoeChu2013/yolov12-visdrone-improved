@@ -53,15 +53,18 @@ def draw_yolov12_uav_architecture():
     }
     
     # Draw Background Grouping Boxes
-    def draw_group(x, y, w, h, label, color):
+    # To align the top borders, we set the top y-coordinate (y + h) to a constant value, say 9.8.
+    top_y = 9.8
+    def draw_group(x, y, w, label, color):
+        h = top_y - y
         rect = patches.Rectangle((x, y), w, h, linewidth=2, edgecolor=color, facecolor='none', linestyle='-.', alpha=0.6)
         ax.add_patch(rect)
         ax.text(x + w/2, y + h - 0.3, label, ha='center', va='top', fontsize=14, fontweight='bold', color=color)
 
-    draw_group(-1.5, -0.8, 4.5, 10.5, "Backbone", '#6AA84F')
-    draw_group(3.5, 3.5, 2.0, 6.0, "Attention", '#B45F06')
-    draw_group(6.5, 1.5, 6.0, 8.0, "Neck (Asymmetric BiFPN)", '#2986CC')
-    draw_group(13.0, 1.5, 2.0, 4.0, "Head", '#C90076')
+    draw_group(-1.5, -0.8, 4.5, "Backbone", '#6AA84F')
+    draw_group(3.5, 3.5, 2.0, "Attention", '#B45F06')
+    draw_group(6.5, 1.5, 6.0, "Neck (Asymmetric BiFPN)", '#2986CC')
+    draw_group(13.0, 1.5, 2.0, "Head", '#C90076')
 
     # Helper to draw boxes
     def draw_node(node_id):
@@ -151,11 +154,11 @@ def draw_yolov12_uav_architecture():
     connect('BU3', 'Head3', offset_x1=box_w/2, offset_x2=-box_w/2)
 
     # Title
-    plt.title("Architecture of YOLOv12-UAV (Tiny-P2P3-Focused)", fontsize=18, fontweight='bold', y=0.95)
+    plt.title("Architecture of YOLOv12-UAV", fontsize=20, fontweight='bold', y=1.02)
     
     # Save
     plt.xlim(-2, 16)
-    plt.ylim(-1, 10)
+    plt.ylim(-1, 10.5)
     plt.tight_layout()
     plt.savefig("yolov12_uav_architecture.png", dpi=300, bbox_inches='tight')
     print("Architecture diagram saved as yolov12_uav_architecture.png")
