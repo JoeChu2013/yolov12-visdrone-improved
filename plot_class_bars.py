@@ -11,7 +11,7 @@ def main():
         return
 
     # Filter out "Improvement" row if present
-    df = df[df['Model'] != 'Improvement (Tiny vs Base)']
+    df = df[df['Model'] != 'Improvement (UAV vs Base)']
     
     # Classes
     classes = [c for c in df.columns if c not in ['Model', 'mAP@0.5']]
@@ -21,19 +21,18 @@ def main():
     # Shorten model names for legend
     short_names = {
         "YOLOv12n (Baseline)": "YOLOv12n (Base)",
-        "YOLOv12-P2-Improved (Symmetric)": "YOLOv12-Improved",
-        "YOLOv12-Tiny-P2P3 (Ours)": "YOLOv12-Tiny (Ours)"
+        "YOLOv12n-UAV (Ours)": "YOLOv12n-UAV (Ours)"
     }
     models = [short_names.get(m, m) for m in models]
     
     # Colors
-    colors = ['#CCCCCC', '#87CEFA', '#FF6347'] # Grey, Light Blue, Tomato Red (Highlight Ours)
+    colors = ['#CCCCCC', '#FF6347'] # Grey, Tomato Red (Highlight Ours)
     
     # 2. Plotting
     plt.figure(figsize=(14, 6))
     
     x = np.arange(len(classes))
-    width = 0.25
+    width = 0.35 # Slightly wider since there are only 2 bars now
     
     # Plot bars for each model
     for i, model_name in enumerate(df['Model']):
@@ -41,20 +40,20 @@ def main():
         values = [float(df.iloc[i][cls].strip('%')) for cls in classes]
         
         # Calculate offset
-        offset = (i - 1) * width
+        offset = (i - 0.5) * width
         
         plt.bar(x + offset, values, width, label=models[i], color=colors[i], edgecolor='white')
         
         # Add values on top of "Ours" bars for emphasis
-        if i == 2: # Ours
+        if i == 1: # Ours
             for j, v in enumerate(values):
-                plt.text(x[j] + offset, v + 1, f"{v:.1f}", ha='center', va='bottom', fontsize=8, color='black', fontweight='bold')
+                plt.text(x[j] + offset, v + 1, f"{v:.1f}", ha='center', va='bottom', fontsize=9, color='black', fontweight='bold')
 
     # Formatting
     plt.ylabel('AP@0.5 (%)', fontsize=12)
     plt.title('Per-Class Performance Comparison', fontsize=14, pad=20)
     plt.xticks(x, [c.capitalize() for c in classes], rotation=0, fontsize=10)
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, frameon=False)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False)
     plt.grid(axis='y', linestyle='--', alpha=0.3)
     plt.ylim(0, 90) # Car is around 78%
     

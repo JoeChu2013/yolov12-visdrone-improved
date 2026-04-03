@@ -6,8 +6,7 @@ def main():
     # 1. Models to compare
     models = {
         "YOLOv12n (Baseline)": "runs/detect/ablation_baseline_ciou/weights/best.pt",
-        "YOLOv12-P2-Improved (Symmetric)": "runs/detect/YOLOv12-P2-Improved/weights/best.pt",
-        "YOLOv12-Tiny-P2P3 (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
+        "YOLOv12n-UAV (Ours)": "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     }
     
     # VisDrone Classes
@@ -75,12 +74,12 @@ def main():
         if col != "Model":
             df[col] = df[col].apply(lambda x: f"{x:.2%}")
             
-    # Calculate Improvement (Tiny vs Base)
-    if len(df) >= 3:
+    # Calculate Improvement (UAV vs Base)
+    if len(df) >= 2:
         baseline = df.iloc[0]
-        final = df.iloc[2]
+        final = df.iloc[1]
         
-        diff_row = {"Model": "Improvement (Tiny vs Base)"}
+        diff_row = {"Model": "Improvement (UAV vs Base)"}
         for col in df.columns:
             if col != "Model":
                 # Convert back to float for subtraction
