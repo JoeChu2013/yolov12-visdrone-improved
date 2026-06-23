@@ -187,6 +187,24 @@ python plot_asymmetric_bifpn_topology.py
 
 感谢原作者提供的优秀基础实现。
 
+## 引用说明
+
+如果本仓库中的改进方案、实验脚本、可视化结果或论文图表对您的研究有帮助，欢迎在论文或项目中引用。若引用的是本文对应的改进工作，建议同时说明其基于 YOLOv12 框架并面向 VisDrone 无人机场景进行了定制化改造。
+
+### BibTeX
+
+```bibtex
+@misc{yolov12n_aca_visdrone,
+  title        = {YOLOv12n-ACA for VisDrone UAV Detection},
+  author       = {JoeChu2013},
+  year         = {2026},
+  howpublished = {\url{https://github.com/JoeChu2013/yolov12-visdrone-improved}},
+  note         = {Improved YOLOv12n for UAV small object detection on VisDrone, including asymmetric BiFPN, ACA enhancement, evaluation scripts, and paper-ready visualizations}
+}
+```
+
+如果您同时参考了原始 YOLOv12 框架，也建议一并引用其原始论文。
+
 ---
 
 ## English
@@ -310,3 +328,17 @@ This project extends:
 
 - [YOLOv12](https://github.com/sunsmarterjie/yolov12)
 - [Ultralytics](https://github.com/ultralytics/ultralytics)
+
+### Citation
+
+If this repository, its modified architecture, evaluation scripts, or paper-ready visualizations are helpful to your research, please consider citing it. If your work also builds on the original YOLOv12 framework, citing the original YOLOv12 paper is also recommended.
+
+```bibtex
+@misc{yolov12n_aca_visdrone,
+  title        = {YOLOv12n-ACA for VisDrone UAV Detection},
+  author       = {JoeChu2013},
+  year         = {2026},
+  howpublished = {\url{https://github.com/JoeChu2013/yolov12-visdrone-improved}},
+  note         = {Improved YOLOv12n for UAV small object detection on VisDrone, including asymmetric BiFPN, ACA enhancement, evaluation scripts, and paper-ready visualizations}
+}
+```
