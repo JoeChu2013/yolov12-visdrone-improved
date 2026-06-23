@@ -1,5 +1,9 @@
 # YOLOv12n-ACA for VisDrone UAV Detection
 
+[中文说明](#中文说明) | [English](#english)
+
+## 中文说明
+
 本仓库基于官方 `YOLOv12` 代码框架，面向 **VisDrone 无人机场景小目标检测** 进行了针对性改造，形成了本文使用的轻量化改进模型 **YOLOv12n-ACA**。仓库同时保留了训练脚本、对比实验脚本、可视化生成脚本以及论文中使用的主要图表。
 
 ## 项目目标
@@ -182,3 +186,127 @@ python plot_asymmetric_bifpn_topology.py
 - [Ultralytics](https://github.com/ultralytics/ultralytics)
 
 感谢原作者提供的优秀基础实现。
+
+---
+
+## English
+
+This repository is built on top of the official `YOLOv12` codebase and focuses on **small-object detection in UAV aerial imagery on VisDrone**. The final model used in the paper is named **YOLOv12n-ACA**. The repository also includes training scripts, evaluation scripts, visualization utilities, and paper-ready figures.
+
+### Project Motivation
+
+VisDrone-style UAV detection is challenging because:
+
+- targets are extremely small and easily submerged by high-level semantics
+- crowded scenes lead to occlusion and dense object layouts
+- overhead viewpoints reduce inter-class appearance differences
+- edge deployment requires a strong balance between accuracy and complexity
+
+### Main Modifications
+
+#### 1. Backbone Enhancement
+
+- Coordinate-attention style enhancement is introduced in high-level feature extraction
+- Spatial position modeling is strengthened for tiny-object perception
+- Related figures: `yolov12_uav_architecture.png`, `fig_3_5_ca_backbone_flow.png`
+
+#### 2. Asymmetric BiFPN
+
+- The full top-down semantic pathway is preserved
+- Only the most useful bottom-up return path `P2 -> P3` is retained
+- Redundant `P4/P5` bottom-up branches are removed to reduce computation
+- Related topology figure: `asymmetric_bifpn_topology.png`
+
+#### 3. Tiny P2/P3 Focused Detection Head
+
+- Detection is focused on `P2` and `P3` feature levels
+- The design targets VisDrone tiny and small objects more directly
+- Training script: `train_tiny_p2p3.py`
+- Model config: `ultralytics/cfg/models/v12/yolov12-tiny-p2p3.yaml`
+
+#### 4. Additional Analysis and Visualization
+
+- IoU/SIoU convergence plots
+- qualitative comparison matrices
+- feature heatmaps and failure-case visualization
+- dataset characteristic and scale distribution plots
+
+### Main Results
+
+The overall comparison is summarized in `final_comprehensive_comparison.csv`.
+
+| Model | Precision | Recall | F1-Score | mAP@0.5 | Params (M) | FLOPs (G) |
+| :-- | :--: | :--: | :--: | :--: | :--: | :--: |
+| YOLOv9t | 46.51% | 33.32% | 38.83% | 33.76% | 2.01 | 7.70 |
+| YOLOv11n | 45.44% | 33.56% | 38.61% | 33.70% | 2.59 | 6.30 |
+| YOLOv12n-ACA (Ours) | 45.64% | 33.12% | 38.39% | 33.66% | 1.88 | 5.42 |
+| YOLOv10n | 44.97% | 33.43% | 38.35% | 33.47% | 2.71 | 8.10 |
+| YOLOv8n | 44.44% | 33.09% | 37.93% | 33.40% | 3.01 | 8.10 |
+| YOLOv12n (Base) | 39.48% | 28.88% | 33.36% | 28.29% | 2.52 | 6.50 |
+
+Key takeaways:
+
+- `YOLOv12n-ACA` improves substantially over the `YOLOv12n` baseline
+- the final model uses only `1.88M` parameters
+- FLOPs are reduced to `5.42G`, making it more suitable for edge-side UAV deployment
+- the model achieves a strong accuracy-complexity trade-off
+
+### Frequently Used Paper Figures
+
+#### Architecture Figures
+
+- `yolov12_baseline_architecture.png`
+- `yolov12_uav_architecture.png`
+- `fig_3_5_ca_backbone_flow.png`
+- `asymmetric_bifpn_topology.png`
+- `siou_vs_ciou_trajectory.png`
+
+#### Dataset and Statistics
+
+- `coco_vs_visdrone_characteristics.png`
+- `visdrone_stats_1_scale.png`
+- `visdrone_stats_2_ratio.png`
+- `visdrone_stats_3_density.png`
+- `dataset_comparison_academic.png`
+
+#### Experimental Visualizations
+
+- `siou_vs_ciou_convergence.png`
+- `per_class_bar_chart.png`
+- `heatmap_comparison.png`
+- `feature_responses_baseline.png`
+- `failure_modes_baseline.png`
+- `final_visual_matrix_scenario_A.png`
+- `final_visual_matrix_scenario_B.png`
+- `final_visual_matrix_scenario_C_updated.png`
+- `final_visual_matrix_scenario_D.png`
+
+### Installation
+
+```bash
+conda create -n yolov12 python=3.11
+conda activate yolov12
+pip install -r requirements.txt
+pip install -e .
+```
+
+### Training
+
+```bash
+python train_tiny_p2p3.py
+```
+
+### Reproducing Key Figures
+
+```bash
+python regenerate_scene_c_highway.py
+python plot_yolov12_uav_arch.py
+python plot_asymmetric_bifpn_topology.py
+```
+
+### Acknowledgements
+
+This project extends:
+
+- [YOLOv12](https://github.com/sunsmarterjie/yolov12)
+- [Ultralytics](https://github.com/ultralytics/ultralytics)
