@@ -70,6 +70,7 @@ def get_feature_heatmap(model_path, img_path):
     return overlay
 
 def main():
+    # Models configuration
     base_model = "runs/detect/ablation_baseline_ciou/weights/best.pt"
     tiny_model = "runs/detect/YOLOv12-Tiny-P2P3-Focused/weights/best.pt"
     
@@ -82,11 +83,13 @@ def main():
     random.seed(45) # Different seed to pick interesting images
     selected_images = random.sample(all_images, 2)
     
-    plt.figure(figsize=(18, 10))
+    plt.figure(figsize=(7.5, 4.8))
     
     try:
-        plt.rcParams['font.sans-serif'] = ['SimHei'] # Windows
+        plt.rcParams['font.sans-serif'] = ['SimSun']
+        plt.rcParams['font.family'] = 'sans-serif'
         plt.rcParams['axes.unicode_minus'] = False
+        plt.rcParams['mathtext.fontset'] = 'stix'
     except:
         pass
         
@@ -99,19 +102,20 @@ def main():
         
         plt.subplot(2, 3, i*3 + 1)
         plt.imshow(img_orig)
-        plt.title("Original Image", fontsize=14)
+        plt.title("原始图像", fontsize=10, fontweight='bold', fontfamily='SimSun')
         plt.axis('off')
         
         plt.subplot(2, 3, i*3 + 2)
         plt.imshow(hm_base)
-        plt.title("YOLOv12n (Baseline) Feature Activation", fontsize=14)
+        plt.title("YOLOv12n (基线模型) 特征响应", fontsize=10, fontweight='bold', fontfamily='SimSun')
         plt.axis('off')
         
         plt.subplot(2, 3, i*3 + 3)
         plt.imshow(hm_tiny)
-        plt.title("YOLOv12n-UAV (Ours) Feature Activation", fontsize=14)
+        plt.title("YOLOv12n-ACA (本文算法) 特征响应", fontsize=10, fontweight='bold', fontfamily='SimSun')
         plt.axis('off')
         
+    plt.subplots_adjust(wspace=0.05, hspace=0.1)
     plt.tight_layout()
     plt.savefig("heatmap_comparison.png", dpi=300, bbox_inches='tight')
     print("Heatmap comparison saved to heatmap_comparison.png")

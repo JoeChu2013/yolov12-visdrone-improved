@@ -74,12 +74,12 @@ def main():
         if col != "Model":
             df[col] = df[col].apply(lambda x: f"{x:.2%}")
             
-    # Calculate Improvement (UAV vs Base)
+    # Calculate Improvement (ACA vs Base)
     if len(df) >= 2:
         baseline = df.iloc[0]
         final = df.iloc[1]
         
-        diff_row = {"Model": "Improvement (UAV vs Base)"}
+        diff_row = {"Model": "Improvement (ACA vs Base)"}
         for col in df.columns:
             if col != "Model":
                 # Convert back to float for subtraction

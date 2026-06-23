@@ -2,7 +2,15 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 def draw_yolov12_uav_architecture():
-    fig, ax = plt.subplots(figsize=(18, 10))
+    try:
+        plt.rcParams['font.sans-serif'] = ['SimSun']
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['axes.unicode_minus'] = False
+        plt.rcParams['mathtext.fontset'] = 'stix'
+    except:
+        pass
+
+    fig, ax = plt.subplots(figsize=(12, 6))
     ax.set_aspect('equal')
     ax.axis('off')
     
@@ -22,49 +30,48 @@ def draw_yolov12_uav_architecture():
     # Define Nodes: {id: (x, y, label, color, type)}
     nodes = {
         # Backbone
-        'Input': (0, 0, 'Input Image\n(640x640)', '#EEEEEE', 'box'),
-        'Stem': (0, 1.2, 'Conv Stem', c_backbone, 'box'),
-        'P2': (2, 2.5, 'C3k2 Block\n(P2, Stride=4)', c_backbone, 'box'),
-        'P3': (2, 4.5, 'C3k2 Block\n(P3, Stride=8)', c_backbone, 'box'),
-        'P4': (2, 6.5, 'A2C2f Block\n(P4, Stride=16)', c_backbone, 'box'),
-        'P5': (2, 8.5, 'A2C2f Block\n(P5, Stride=32)', c_backbone, 'box'),
+        'Input': (0, 0, '输入图像\n(640x640)', '#EEEEEE', 'box'),
+        'Stem': (0, 1.2, '卷积主干\n(Conv Stem)', c_backbone, 'box'),
+        'P2': (2, 2.5, 'C3k2模块\n(P2, Stride=4)', c_backbone, 'box'),
+        'P3': (2, 4.5, 'C3k2模块\n(P3, Stride=8)', c_backbone, 'box'),
+        'P4': (2, 6.5, 'A2C2f模块\n(P4, Stride=16)', c_backbone, 'box'),
+        'P5': (2, 8.5, 'A2C2f模块\n(P5, Stride=32)', c_backbone, 'box'),
         
         # CA Modules
-        'CA3': (4.5, 4.5, 'CoordAtt\n(CA)', c_ca, 'box'),
-        'CA4': (4.5, 6.5, 'CoordAtt\n(CA)', c_ca, 'box'),
-        'CA5': (4.5, 8.5, 'CoordAtt\n(CA)', c_ca, 'box'),
+        'CA3': (4.5, 4.5, '坐标注意力\n(CA)', c_ca, 'box'),
+        'CA4': (4.5, 6.5, '坐标注意力\n(CA)', c_ca, 'box'),
         
         # Neck - Top Down
-        'TD5': (8, 8.5, 'Proj (P5)', c_td, 'box'),
-        'TD4': (8, 6.5, 'BiFPN_Add\nA2C2f (P4)', c_td, 'box'),
-        'TD3': (8, 4.5, 'BiFPN_Add\nA2C2f (P3)', c_td, 'box'),
-        'TD2': (8, 2.5, 'BiFPN_Add\nC3k2 (P2)', c_td, 'box'),
+        'TD5': (8, 8.5, '映射层 (P5)', c_td, 'box'),
+        'TD4': (8, 6.5, '特征融合\nA2C2f (P4)', c_td, 'box'),
+        'TD3': (8, 4.5, '特征融合\nA2C2f (P3)', c_td, 'box'),
+        'TD2': (8, 2.5, '特征融合\nC3k2 (P2)', c_td, 'box'),
         
         # Neck - Bottom Up (Asymmetric)
-        'BU3': (11, 4.5, 'BiFPN_Add\nA2C2f (P3)', c_bu, 'box'),
+        'BU3': (11, 4.5, '特征融合\nA2C2f (P3)', c_bu, 'box'),
         
         # Ghost Nodes for Asymmetry Visualization
-        'Ghost4': (11, 6.5, 'Truncated\n(No BU P4)', c_ghost, 'dashed'),
-        'Ghost5': (11, 8.5, 'Truncated\n(No BU P5)', c_ghost, 'dashed'),
+        'Ghost4': (11, 6.5, '路径截断\n(无底向上 P4)', c_ghost, 'dashed'),
+        'Ghost5': (11, 8.5, '路径截断\n(无底向上 P5)', c_ghost, 'dashed'),
         
         # Heads
-        'Head2': (14, 2.5, 'Detect Head\n(Tiny Objects)', c_head, 'box'),
-        'Head3': (14, 4.5, 'Detect Head\n(Small Objects)', c_head, 'box'),
+        'Head2': (14, 2.5, '检测头\n(微小目标)', c_head, 'box'),
+        'Head3': (14, 4.5, '检测头\n(小目标)', c_head, 'box'),
     }
     
     # Draw Background Grouping Boxes
     # To align the top borders, we set the top y-coordinate (y + h) to a constant value, say 9.8.
     top_y = 9.8
-    def draw_group(x, y, w, label, color):
-        h = top_y - y
-        rect = patches.Rectangle((x, y), w, h, linewidth=2, edgecolor=color, facecolor='none', linestyle='-.', alpha=0.6)
+    def draw_group(x, y, w, label, color, top_override=None):
+        h = (top_override if top_override is not None else top_y) - y
+        rect = patches.Rectangle((x, y), w, h, linewidth=1.5, edgecolor=color, facecolor='none', linestyle='-.', alpha=0.6)
         ax.add_patch(rect)
-        ax.text(x + w/2, y + h - 0.3, label, ha='center', va='top', fontsize=14, fontweight='bold', color=color)
+        ax.text(x + w/2, y + h - 0.3, label, ha='center', va='top', fontsize=10, fontweight='bold', color=color)
 
-    draw_group(-1.5, -0.8, 4.5, "Backbone", '#6AA84F')
-    draw_group(3.5, 3.5, 2.0, "Attention", '#B45F06')
-    draw_group(6.5, 1.5, 6.0, "Neck (Asymmetric BiFPN)", '#2986CC')
-    draw_group(13.0, 1.5, 2.0, "Head", '#C90076')
+    draw_group(-1.5, -0.8, 4.5, "骨干网络", '#6AA84F')
+    draw_group(3.5, 3.5, 2.0, "注意力", '#B45F06', top_override=7.8)
+    draw_group(6.5, 1.5, 6.0, "特征颈部 (非对称 BiFPN)", '#2986CC')
+    draw_group(13.0, 1.5, 2.0, "检测头", '#C90076')
 
     # Helper to draw boxes
     def draw_node(node_id):
@@ -73,17 +80,17 @@ def draw_yolov12_uav_architecture():
         alpha = 0.5 if style == 'dashed' else 1.0
         
         rect = patches.FancyBboxPatch((x - box_w/2, y - box_h/2), box_w, box_h, 
-                                      boxstyle="round,pad=0.1", fc=color, ec=c_edge, lw=1.5, linestyle=ls, alpha=alpha, zorder=5)
+                                      boxstyle="round,pad=0.1", fc=color, ec=c_edge, lw=1.2, linestyle=ls, alpha=alpha, zorder=5)
         ax.add_patch(rect)
-        ax.text(x, y, label, ha='center', va='center', fontsize=10, fontweight='bold', alpha=alpha, zorder=6)
+        ax.text(x, y, label, ha='center', va='center', fontsize=9.5, fontweight='bold', alpha=alpha, zorder=6)
 
     # Draw all nodes
     for nid in nodes:
         draw_node(nid)
 
     # Helper to draw arrows
-    arrow_props = dict(arrowstyle='->', color=c_edge, lw=1.5, mutation_scale=15)
-    dashed_arrow_props = dict(arrowstyle='->', color='gray', lw=1.5, mutation_scale=15, linestyle='--')
+    arrow_props = dict(arrowstyle='->', color=c_edge, lw=1.2, mutation_scale=12)
+    dashed_arrow_props = dict(arrowstyle='->', color='gray', lw=1.2, mutation_scale=12, linestyle='--')
     
     def connect(n1, n2, style='straight', offset_x1=0, offset_y1=0, offset_x2=0, offset_y2=0, dashed=False):
         x1, y1 = nodes[n1][0] + offset_x1, nodes[n1][1] + offset_y1
@@ -110,17 +117,16 @@ def draw_yolov12_uav_architecture():
     connect('P4', 'P5', offset_y1=box_h/2, offset_y2=-box_h/2)
     
     # Downsample labels
-    ax.text(2.1, 3.5, "Conv(s=2)", fontsize=8, color='gray')
-    ax.text(2.1, 5.5, "Conv(s=2)", fontsize=8, color='gray')
-    ax.text(2.1, 7.5, "Conv(s=2)", fontsize=8, color='gray')
+    ax.text(2.1, 3.5, "下采样\n(Stride=2)", fontsize=8, color='gray')
+    ax.text(2.1, 5.5, "下采样\n(Stride=2)", fontsize=8, color='gray')
+    ax.text(2.1, 7.5, "下采样\n(Stride=2)", fontsize=8, color='gray')
 
     # Backbone to CA
     connect('P3', 'CA3', offset_x1=box_w/2, offset_x2=-box_w/2)
     connect('P4', 'CA4', offset_x1=box_w/2, offset_x2=-box_w/2)
-    connect('P5', 'CA5', offset_x1=box_w/2, offset_x2=-box_w/2)
     
     # CA to Top-Down
-    connect('CA5', 'TD5', offset_x1=box_w/2, offset_x2=-box_w/2)
+    connect('P5', 'TD5', offset_x1=box_w/2, offset_x2=-box_w/2)
     connect('CA4', 'TD4', offset_x1=box_w/2, offset_x2=-box_w/2)
     connect('CA3', 'TD3', offset_x1=box_w/2, offset_x2=-box_w/2)
     connect('P2', 'TD2', style='vertical_then_horizontal', offset_x1=box_w/2, offset_x2=-box_w/2, offset_y1=-0.2) # P2 goes to TD2 directly
@@ -131,14 +137,14 @@ def draw_yolov12_uav_architecture():
     connect('TD3', 'TD2', offset_y1=-box_h/2, offset_y2=box_h/2)
     
     # Upsample labels
-    ax.text(8.1, 7.5, "Upsample", fontsize=8, color='gray')
-    ax.text(8.1, 5.5, "Upsample", fontsize=8, color='gray')
-    ax.text(8.1, 3.5, "Upsample", fontsize=8, color='gray')
+    ax.text(8.1, 7.5, "上采样", fontsize=8, color='gray')
+    ax.text(8.1, 5.5, "上采样", fontsize=8, color='gray')
+    ax.text(8.1, 3.5, "上采样", fontsize=8, color='gray')
 
     # Bottom-Up Path (Asymmetric)
     # TD2 -> BU3
     connect('TD2', 'BU3', style='horizontal_then_vertical', offset_x1=box_w/2, offset_x2=-box_w/2+0.5, offset_y1=0.2)
-    ax.text(9.5, 3.5, "Downsample", fontsize=8, color='gray', rotation=90)
+    ax.text(9.5, 3.5, "下采样", fontsize=8, color='gray', rotation=90)
     
     # TD3 -> BU3 (Skip connection)
     connect('TD3', 'BU3', offset_x1=box_w/2, offset_x2=-box_w/2)
@@ -154,7 +160,7 @@ def draw_yolov12_uav_architecture():
     connect('BU3', 'Head3', offset_x1=box_w/2, offset_x2=-box_w/2)
 
     # Title
-    plt.title("Architecture of YOLOv12-UAV", fontsize=20, fontweight='bold', y=1.02)
+    plt.title("YOLOv12n-ACA 改进网络架构图", fontsize=15, fontweight='bold', y=1.02)
     
     # Save
     plt.xlim(-2, 16)

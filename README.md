@@ -1,189 +1,184 @@
+# YOLOv12n-ACA for VisDrone UAV Detection
 
+本仓库基于官方 `YOLOv12` 代码框架，面向 **VisDrone 无人机场景小目标检测** 进行了针对性改造，形成了本文使用的轻量化改进模型 **YOLOv12n-ACA**。仓库同时保留了训练脚本、对比实验脚本、可视化生成脚本以及论文中使用的主要图表。
 
-<div align="center">
-<h1>YOLOv12</h1>
-<h3>YOLOv12: Attention-Centric Real-Time Object Detectors</h3>
+## 项目目标
 
-[Yunjie Tian](https://sunsmarterjie.github.io/)<sup>1</sup>, [Qixiang Ye](https://people.ucas.ac.cn/~qxye?language=en)<sup>2</sup>, [David Doermann](https://cse.buffalo.edu/~doermann/)<sup>1</sup>
+无人机航拍场景中的检测任务具有以下典型难点：
 
-<sup>1</sup>  University at Buffalo, SUNY, <sup>2</sup> University of Chinese Academy of Sciences.
+- 目标尺寸极小，远距离目标容易被高层语义淹没
+- 场景密集，车辆和行人常出现遮挡与紧邻分布
+- 背景复杂，俯视视角下不同类别车辆的外观差异被压缩
+- 边缘设备部署受限，模型需要兼顾精度与复杂度
 
+为解决上述问题，本项目以 `YOLOv12n` 为基线，围绕小目标表征、多尺度融合和回归优化进行了系统改进。
 
-<p align="center">
-  <img src="assets/tradeoff_turbo.svg" width=90%> <br>
-  Comparison with popular methods in terms of latency-accuracy (left) and FLOPs-accuracy (right) trade-offs
-</p>
+## 改动方案
 
-</div>
+### 1. 骨干增强
 
-[![arXiv](https://img.shields.io/badge/arXiv-2502.12524-b31b1b.svg)](https://arxiv.org/abs/2502.12524) [![Hugging Face Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/sunsmarterjieleaf/yolov12) <a href="https://colab.research.google.com/github/roboflow-ai/notebooks/blob/main/notebooks/train-yolov12-object-detection-model.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a> [![Kaggle Notebook](https://img.shields.io/badge/Kaggle-Notebook-blue?logo=kaggle)](https://www.kaggle.com/code/jxxn03x/yolov12-on-custom-data) [![LightlyTrain Notebook](https://img.shields.io/badge/LightlyTrain-Notebook-blue?)](https://colab.research.google.com/github/lightly-ai/lightly-train/blob/main/examples/notebooks/yolov12.ipynb) [![deploy](https://media.roboflow.com/deploy.svg)](https://blog.roboflow.com/use-yolov12-with-roboflow/#deploy-yolov12-models-with-roboflow) [![Openbayes](https://img.shields.io/static/v1?label=Demo&message=OpenBayes%E8%B4%9D%E5%BC%8F%E8%AE%A1%E7%AE%97&color=green)](https://openbayes.com/console/public/tutorials/A4ac4xNrUCQ) 
+- 在高层特征提取阶段引入坐标注意力思想，增强空间位置信息建模能力
+- 强化小目标的局部结构响应，减轻纯语义特征对细节信息的覆盖
+- 对应可视化图：`yolov12_uav_architecture.png`、`fig_3_5_ca_backbone_flow.png`
 
-## Updates
+### 2. 非对称 BiFPN
 
-- 2025/06/17: **Use this repo for YOLOv12 instead of [ultralytics](https://github.com/ultralytics/ultralytics/tree/main/ultralytics/cfg/models/12). Their implementation is inefficient, requires more memory, and has unstable training, which are fixed here!**
-  
-- 2025/07/01: YOLOv12's **classification** models are released, see [code](https://github.com/sunsmarterjie/yolov12/tree/Cls).
-- 2025/06/04: YOLOv12's **instance segmentation** models are released, see [code](https://github.com/sunsmarterjie/yolov12/tree/Seg).
+- 保留完整的自顶向下语义传递路径
+- 仅保留对微小目标最有价值的 `P2 -> P3` 自底向上回流
+- 裁剪冗余的 `P4/P5` 底向上分支，降低计算量和冗余融合
+- 对应拓扑图：`asymmetric_bifpn_topology.png`
 
-- 2025/04/15: Pretrain a YOLOv12 model with [LightlyTrain](https://docs.lightly.ai/train/stable/index.html), a novel framework that lets you pretrain any computer vision model on your unlabeled data, with [YOLOv12 support](https://docs.lightly.ai/train/stable/models/yolov12.html). Here is also a [Colab tutorial](https://colab.research.google.com/github/lightly-ai/lightly-train/blob/main/examples/notebooks/yolov12.ipynb)!
+### 3. Tiny P2/P3 Focused Detection Head
 
-- 2025/03/18: Some guys are interested in the heatmap. See this [issue](https://github.com/sunsmarterjie/yolov12/issues/74).
+- 检测头聚焦于 `P2` 与 `P3` 两个尺度
+- 重点服务 VisDrone 中占比更高的微小目标和小目标
+- 相关训练脚本：`train_tiny_p2p3.py`
+- 相关模型配置：`ultralytics/cfg/models/v12/yolov12-tiny-p2p3.yaml`
 
-- 2025/03/09: **YOLOv12-turbo** is released: a faster YOLOv12 version.
+### 4. 回归与实验分析增强
 
-- 2025/02/24: Blogs: [ultralytics](https://docs.ultralytics.com/models/yolo12/), [LearnOpenCV](https://learnopencv.com/yolov12/). Thanks to them!
+- 引入 SIoU / IoU 收敛分析脚本，对不同损失函数的优化特性进行可视化
+- 补充类别对比、热力图、失败案例、数据集统计等论文支撑材料
+- 相关脚本包括：
+  - `plot_iou_convergence.py`
+  - `generate_heatmaps.py`
+  - `generate_failure_cases.py`
+  - `generate_feature_responses.py`
+  - `dataset_statistics.py`
 
-- 2025/02/22: [YOLOv12 TensorRT CPP Inference Repo + Google Colab Notebook](https://github.com/mohamedsamirx/YOLOv12-TensorRT-CPP).
+## 主要效果
 
-- 2025/02/22: [Android deploy](https://github.com/mpj1234/ncnn-yolov12-android/tree/main) / [TensorRT-YOLO](https://github.com/laugh12321/TensorRT-YOLO) accelerates yolo12. Thanks to them!
+`final_comprehensive_comparison.csv` 中汇总了本文模型与主流轻量化检测模型的综合对比结果：
 
-- 2025/02/20: [Any computer or edge device?](https://github.com/roboflow/inference)  / [ONNX CPP Version](https://github.com/mohamedsamirx/YOLOv12-ONNX-CPP). Thanks to them! 
-  
-- 2025/02/20: Train a yolov12 model on a custom dataset: [Blog](https://blog.roboflow.com/train-yolov12-model/) and [Youtube](https://www.youtube.com/watch?v=fksJmIMIfXo). / [Step-by-step instruction](https://youtu.be/dO8k5rgXG0M). Thanks to them! 
+| 模型 | Precision | Recall | F1-Score | mAP@0.5 | Params (M) | FLOPs (G) |
+| :-- | :--: | :--: | :--: | :--: | :--: | :--: |
+| YOLOv9t | 46.51% | 33.32% | 38.83% | 33.76% | 2.01 | 7.70 |
+| YOLOv11n | 45.44% | 33.56% | 38.61% | 33.70% | 2.59 | 6.30 |
+| YOLOv12n-ACA (Ours) | 45.64% | 33.12% | 38.39% | 33.66% | 1.88 | 5.42 |
+| YOLOv10n | 44.97% | 33.43% | 38.35% | 33.47% | 2.71 | 8.10 |
+| YOLOv8n | 44.44% | 33.09% | 37.93% | 33.40% | 3.01 | 8.10 |
+| YOLOv12n (Base) | 39.48% | 28.88% | 33.36% | 28.29% | 2.52 | 6.50 |
 
-- 2025/02/19: [arXiv version](https://arxiv.org/abs/2502.12524) is public. [Demo](https://huggingface.co/spaces/sunsmarterjieleaf/yolov12) is available (try [Demo2](https://huggingface.co/spaces/sunsmarterjieleaf/yolov12_demo2) [Demo3](https://huggingface.co/spaces/sunsmarterjieleaf/yolov12_demo3) if busy).
+从结果可以看到：
 
+- 本文模型在 `mAP@0.5` 上相较基线 `YOLOv12n` 提升明显
+- 参数量降至 `1.88M`，为对比模型中最低
+- FLOPs 仅 `5.42G`，具备更强的边缘部署潜力
+- 在综合精度-复杂度权衡上，`YOLOv12n-ACA` 具有较强竞争力
 
-<details>
-  <summary>
-  <font size="+1">Abstract</font>
-  </summary>
-Enhancing the network architecture of the YOLO framework has been crucial for a long time but has focused on CNN-based improvements despite the proven superiority of attention mechanisms in modeling capabilities. This is because attention-based models cannot match the speed of CNN-based models. This paper proposes an attention-centric YOLO framework, namely YOLOv12, that matches the speed of previous CNN-based ones while harnessing the performance benefits of attention mechanisms.
+## 论文图表与可视化结果
 
-YOLOv12 surpasses all popular real-time object detectors in accuracy with competitive speed. For example, YOLOv12-N achieves 40.6% mAP with an inference latency of 1.64 ms on a T4 GPU, outperforming advanced YOLOv10-N / YOLOv11-N by 2.1%/1.2% mAP with a comparable speed. This advantage extends to other model scales. YOLOv12 also surpasses end-to-end real-time detectors that improve DETR, such as RT-DETR / RT-DETRv2: YOLOv12-S beats RT-DETR-R18 / RT-DETRv2-R18 while running 42% faster, using only 36% of the computation and 45% of the parameters.
-</details>
+仓库中已经整理出论文常用图表，可直接复用或继续微调：
 
+### 架构与机制图
 
-## Main Results
+- `yolov12_baseline_architecture.png`
+- `yolov12_uav_architecture.png`
+- `fig_3_5_ca_backbone_flow.png`
+- `asymmetric_bifpn_topology.png`
+- `siou_vs_ciou_trajectory.png`
 
-**Turbo (default)**:
-| Model (det)                                                                              | size<br><sup>(pixels) | mAP<sup>val<br>50-95 | Speed (ms) <br><sup>T4 TensorRT10<br> | params<br><sup>(M) | FLOPs<br><sup>(G) |
-| :----------------------------------------------------------------------------------- | :-------------------: | :-------------------:| :------------------------------:| :-----------------:| :---------------:|
-| [YOLO12n](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12n.pt) | 640                   | 40.4                 | 1.60                            | 2.5                | 6.0               |
-| [YOLO12s](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12s.pt) | 640                   | 47.6                 | 2.42                            | 9.1                | 19.4              |
-| [YOLO12m](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12m.pt) | 640                   | 52.5                 | 4.27                            | 19.6               | 59.8              |
-| [YOLO12l](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12l.pt) | 640                   | 53.8                 | 5.83                            | 26.5               | 82.4              |
-| [YOLO12x](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12x.pt) | 640                   | 55.4                 | 10.38                           | 59.3               | 184.6             |
+### 数据集与统计图
 
-[**v1.0**](https://github.com/sunsmarterjie/yolov12/tree/V1.0):
-| Model (det)                                                                               | size<br><sup>(pixels) | mAP<sup>val<br>50-95 | Speed (ms) <br><sup>T4 TensorRT10<br> | params<br><sup>(M) | FLOPs<br><sup>(G) |
-| :----------------------------------------------------------------------------------- | :-------------------: | :-------------------:| :------------------------------:| :-----------------:| :---------------:|
-| [YOLO12n](https://github.com/sunsmarterjie/yolov12/releases/download/v1.0/yolov12n.pt) | 640                   | 40.6                 | 1.64                            | 2.6                | 6.5               |
-| [YOLO12s](https://github.com/sunsmarterjie/yolov12/releases/download/v1.0/yolov12s.pt) | 640                   | 48.0                 | 2.61                            | 9.3                | 21.4              |
-| [YOLO12m](https://github.com/sunsmarterjie/yolov12/releases/download/v1.0/yolov12m.pt) | 640                   | 52.5                 | 4.86                            | 20.2               | 67.5              |
-| [YOLO12l](https://github.com/sunsmarterjie/yolov12/releases/download/v1.0/yolov12l.pt) | 640                   | 53.7                 | 6.77                            | 26.4               | 88.9              |
-| [YOLO12x](https://github.com/sunsmarterjie/yolov12/releases/download/v1.0/yolov12x.pt) | 640                   | 55.2                 | 11.79                           | 59.1               | 199.0             |
+- `coco_vs_visdrone_characteristics.png`
+- `visdrone_stats_1_scale.png`
+- `visdrone_stats_2_ratio.png`
+- `visdrone_stats_3_density.png`
+- `dataset_comparison_academic.png`
 
-[**Instance segmentation**](https://github.com/sunsmarterjie/yolov12/tree/Seg):
-| Model (seg)                                                                              | size<br><sup>(pixels) | mAP<sup>box<br>50-95 | mAP<sup>mask<br>50-95 | Speed  (ms) <br><sup>T4 TensorRT10<br> | params<br><sup>(M) | FLOPs<br><sup>(G) |
-| :------------------------------------------------------------------------------------| :--------------------: | :-------------------: | :---------------------: | :--------------------------------:| :------------------: | :-----------------: |
-| [YOLOv12n-seg](https://github.com/sunsmarterjie/yolov12/releases/download/seg/yolov12n-seg.pt) | 640                   | 39.9                 | 32.8                  | 1.84                           | 2.8                | 9.9              |
-| [YOLOv12s-seg](https://github.com/sunsmarterjie/yolov12/releases/download/seg/yolov12s-seg.pt) | 640                   | 47.5                 | 38.6                  | 2.84                           | 9.8                | 33.4              |
-| [YOLOv12m-seg](https://github.com/sunsmarterjie/yolov12/releases/download/seg/yolov12m-seg.pt) | 640                   | 52.4                 | 42.3                  | 6.27                           | 21.9               | 115.1             |
-| [YOLOv12l-seg](https://github.com/sunsmarterjie/yolov12/releases/download/seg/yolov12l-seg.pt) | 640                   | 54.0                 | 43.2                  | 7.61                          | 28.8               | 137.7             |
-| [YOLOv12x-seg](https://github.com/sunsmarterjie/yolov12/releases/download/seg/yolov12x-seg.pt) | 640                   | 55.2                 | 44.2                  | 15.43                          | 64.5               | 308.7             |
+### 训练与实验结果图
 
+- `siou_vs_ciou_convergence.png`
+- `per_class_bar_chart.png`
+- `heatmap_comparison.png`
+- `feature_responses_baseline.png`
+- `failure_modes_baseline.png`
+- `final_visual_matrix_scenario_A.png`
+- `final_visual_matrix_scenario_B.png`
+- `final_visual_matrix_scenario_C_updated.png`
+- `final_visual_matrix_scenario_D.png`
 
-[**Classification**](https://github.com/sunsmarterjie/yolov12/tree/Cls):
-| Model (cls)                                                                              | size<br><sup>(pixels) | Acc.<br><sup>top-1<br> | Acc.<br><sup>top-5<br> | Speed  (ms) <br><sup>T4 TensorRT10<br> | params<br><sup>(M) | FLOPs<br><sup>(G) |
-| :----------------------------------------------------------------------------------------| :-------------------: | :------------: | :------------: | :-------------------------------------:| :----------------: | :---------------: |
-| [YOLOv12n-cls](https://github.com/sunsmarterjie/yolov12/releases/download/cls/yolov12n-cls.pt) | 224             | 71.7           | 90.5           | 1.27                                   | 2.9                | 0.5               |
-| [YOLOv12s-cls](https://github.com/sunsmarterjie/yolov12/releases/download/cls/yolov12s-cls.pt) | 224             | 76.4           | 93.3           | 1.52                                   | 7.2                | 1.5               |
-| [YOLOv12m-cls](https://github.com/sunsmarterjie/yolov12/releases/download/cls/yolov12m-cls.pt) | 224             | 78.8           | 94.4           | 2.03                                   | 12.7               | 4.5               |
-| [YOLOv12l-cls](https://github.com/sunsmarterjie/yolov12/releases/download/cls/yolov12l-cls.pt) | 224             | 79.5           | 94.5           | 2.73                                   | 16.8               | 6.2               |
-| [YOLOv12x-cls](https://github.com/sunsmarterjie/yolov12/releases/download/cls/yolov12x-cls.pt) | 224             | 80.1           | 95.3           | 3.64                                   | 35.5               | 13.7              |
+## 关键脚本说明
 
-</details>
+### 训练与评估
 
+- `train_tiny_p2p3.py`：训练 YOLOv12n-ACA 主模型
+- `compare_sota.py`：与 YOLOv8/v9/v10/v11 等模型对比
+- `eval_coco_multiscale.py`：多尺度 COCO 指标评估
+- `convert_yolo_to_coco.py`：YOLO 检测结果转 COCO 格式
 
-## Installation
-```
-wget https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.3/flash_attn-2.7.3+cu11torch2.2cxx11abiFALSE-cp311-cp311-linux_x86_64.whl
+### 可视化与论文素材生成
+
+- `generate_visual_matrix.py`：多模型定性检测结果矩阵
+- `regenerate_scene_c_highway.py`：重生成高速公路密集车流场景 C
+- `generate_heatmaps.py`：特征热力图对比
+- `generate_feature_responses.py`：骨干特征响应图
+- `generate_failure_cases.py`：失败模式可视化
+- `plot_yolov12_base_arch.py`：基线架构图
+- `plot_yolov12_uav_arch.py`：改进架构图
+- `plot_asymmetric_bifpn_topology.py`：非对称 BiFPN 拓扑图
+
+## 环境安装
+
+建议使用 Python 3.11 和 CUDA 环境。
+
+```bash
 conda create -n yolov12 python=3.11
 conda activate yolov12
 pip install -r requirements.txt
 pip install -e .
 ```
 
-## Validation
-[`yolov12n`](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12n.pt)
-[`yolov12s`](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12s.pt)
-[`yolov12m`](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12m.pt)
-[`yolov12l`](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12l.pt)
-[`yolov12x`](https://github.com/sunsmarterjie/yolov12/releases/download/turbo/yolov12x.pt)
+## 训练示例
 
-```python
-from ultralytics import YOLO
-
-model = YOLO('yolov12{n/s/m/l/x}.pt')
-model.val(data='coco.yaml', save_json=True)
+```bash
+python train_tiny_p2p3.py
 ```
 
-## Training 
-```python
-from ultralytics import YOLO
+训练完成后，结果默认保存在：
 
-model = YOLO('yolov12n.yaml')
-
-# Train the model
-results = model.train(
-  data='coco.yaml',
-  epochs=600, 
-  batch=256, 
-  imgsz=640,
-  scale=0.5,  # S:0.9; M:0.9; L:0.9; X:0.9
-  mosaic=1.0,
-  mixup=0.0,  # S:0.05; M:0.15; L:0.15; X:0.2
-  copy_paste=0.1,  # S:0.15; M:0.4; L:0.5; X:0.6
-  device="0,1,2,3",
-)
-
-# Evaluate model performance on the validation set
-metrics = model.val()
-
-# Perform object detection on an image
-results = model("path/to/image.jpg")
-results[0].show()
-
+```text
+runs/detect/YOLOv12-Tiny-P2P3-Focused
 ```
 
-## Prediction
-```python
-from ultralytics import YOLO
+主要文件包括：
 
-model = YOLO('yolov12{n/s/m/l/x}.pt')
-model.predict()
+- `weights/best.pt`
+- `results.csv`
+- `results.png`
+- `confusion_matrix.png`
+
+## 结果复现示例
+
+### 1. 重新生成场景 C 高速公路密集车流检测对比图
+
+```bash
+python regenerate_scene_c_highway.py
 ```
 
-## Export
-```python
-from ultralytics import YOLO
+### 2. 重新生成改进架构图
 
-model = YOLO('yolov12{n/s/m/l/x}.pt')
-model.export(format="engine", half=True)  # or format="onnx"
+```bash
+python plot_yolov12_uav_arch.py
 ```
 
+### 3. 重新生成非对称 BiFPN 拓扑图
 
-## Demo
-
-```
-python app.py
-# Please visit http://127.0.0.1:7860
+```bash
+python plot_asymmetric_bifpn_topology.py
 ```
 
+## 仓库说明
 
-## Acknowledgement
+- 本仓库以论文实验和可视化整理为主
+- 部分脚本用于中间分析、图表重绘或论文排版适配
+- 如需面向工程部署，可进一步清理中间文件并补充统一的数据处理入口
 
-The code is based on [ultralytics](https://github.com/ultralytics/ultralytics). Thanks for their excellent work!
+## 致谢
 
-## Citation
+本项目代码基于以下开源工作进行扩展：
 
-```BibTeX
-@article{tian2025yolov12,
-  title={YOLOv12: Attention-Centric Real-Time Object Detectors},
-  author={Tian, Yunjie and Ye, Qixiang and Doermann, David},
-  journal={arXiv preprint arXiv:2502.12524},
-  year={2025}
-}
-```
+- [YOLOv12](https://github.com/sunsmarterjie/yolov12)
+- [Ultralytics](https://github.com/ultralytics/ultralytics)
 
+感谢原作者提供的优秀基础实现。

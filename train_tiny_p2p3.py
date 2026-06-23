@@ -19,7 +19,7 @@ def main():
         model.train(
             data='ultralytics/cfg/datasets/VisDrone.yaml',
             epochs=100,
-            batch=32, # Much smaller model, can use larger batch!
+            batch=8, # Reduced batch size to avoid OOM or crash
             imgsz=640,
             lr0=0.01,
             optimizer='SGD',

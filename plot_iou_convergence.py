@@ -3,6 +3,15 @@ import matplotlib.pyplot as plt
 import os
 
 def main():
+    # Setup Font for Academic Papers
+    try:
+        plt.rcParams['font.sans-serif'] = ['SimSun']
+        plt.rcParams['font.family'] = 'sans-serif'
+        plt.rcParams['axes.unicode_minus'] = False
+        plt.rcParams['mathtext.fontset'] = 'stix'
+    except:
+        pass
+        
     # Paths
     # Baseline (CIoU)
     path_ciou = 'runs/detect/ablation_baseline_ciou/results.csv'
@@ -41,51 +50,59 @@ def main():
     df_s.columns = [c.strip() for c in df_s.columns]
     
     # Plotting
-    plt.figure(figsize=(12, 10))
+    fig, axes = plt.subplots(2, 2, figsize=(7.2, 5.0))
     
+    prop_legend = {'family': 'serif', 'size': 9}
+    font_title = {'family': 'SimSun', 'size': 11, 'weight': 'bold'}
+    font_label = {'family': 'SimSun', 'size': 10}
+
     # 1. mAP@0.5 Convergence (Speed of Accuracy)
-    plt.subplot(2, 2, 1)
-    plt.plot(df_c['epoch'], df_c['metrics/mAP50(B)'], label='CIoU', color='blue', linestyle='--')
-    plt.plot(df_s['epoch'], df_s['metrics/mAP50(B)'], label='SIoU', color='red')
-    plt.title('mAP@0.5 Convergence Speed')
-    plt.xlabel('Epoch')
-    plt.ylabel('mAP@0.5')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    ax = axes[0, 0]
+    ax.plot(df_c['epoch'], df_c['metrics/mAP50(B)'], label=r'$\mathrm{CIoU}$', color='blue', linestyle='--', linewidth=1.5)
+    ax.plot(df_s['epoch'], df_s['metrics/mAP50(B)'], label=r'$\mathrm{SIoU}$', color='red', linewidth=1.5)
+    ax.set_title(r'(a) $\mathrm{mAP@0.5}$ 收敛曲线', fontdict=font_title, pad=10)
+    ax.set_xlabel('训练轮次', fontdict=font_label)
+    ax.set_ylabel(r'$\mathrm{mAP@0.5}$', fontdict={'family': 'serif', 'size': 10})
+    ax.legend(prop=prop_legend)
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(axis='both', which='major', labelsize=9)
     
     # 2. Box Loss Convergence (Speed of Regression Learning)
-    plt.subplot(2, 2, 2)
-    plt.plot(df_c['epoch'], df_c['val/box_loss'], label='CIoU', color='blue', linestyle='--')
-    plt.plot(df_s['epoch'], df_s['val/box_loss'], label='SIoU', color='red')
-    plt.title('Validation Box Loss Convergence')
-    plt.xlabel('Epoch')
-    plt.ylabel('Box Loss')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    ax = axes[0, 1]
+    ax.plot(df_c['epoch'], df_c['val/box_loss'], label=r'$\mathrm{CIoU}$', color='blue', linestyle='--', linewidth=1.5)
+    ax.plot(df_s['epoch'], df_s['val/box_loss'], label=r'$\mathrm{SIoU}$', color='red', linewidth=1.5)
+    ax.set_title('(b) 验证集边界框损失收敛曲线', fontdict=font_title, pad=10)
+    ax.set_xlabel('训练轮次', fontdict=font_label)
+    ax.set_ylabel('边界框损失', fontdict=font_label)
+    ax.legend(prop=prop_legend)
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(axis='both', which='major', labelsize=9)
     
     # 3. Precision Convergence
-    plt.subplot(2, 2, 3)
-    plt.plot(df_c['epoch'], df_c['metrics/precision(B)'], label='CIoU', color='blue', linestyle='--')
-    plt.plot(df_s['epoch'], df_s['metrics/precision(B)'], label='SIoU', color='red')
-    plt.title('Precision Convergence')
-    plt.xlabel('Epoch')
-    plt.ylabel('Precision')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    ax = axes[1, 0]
+    ax.plot(df_c['epoch'], df_c['metrics/precision(B)'], label=r'$\mathrm{CIoU}$', color='blue', linestyle='--', linewidth=1.5)
+    ax.plot(df_s['epoch'], df_s['metrics/precision(B)'], label=r'$\mathrm{SIoU}$', color='red', linewidth=1.5)
+    ax.set_title('(c) 精确率收敛曲线', fontdict=font_title, pad=10)
+    ax.set_xlabel('训练轮次', fontdict=font_label)
+    ax.set_ylabel('精确率', fontdict=font_label)
+    ax.legend(prop=prop_legend)
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(axis='both', which='major', labelsize=9)
 
     # 4. Recall Convergence
-    plt.subplot(2, 2, 4)
-    plt.plot(df_c['epoch'], df_c['metrics/recall(B)'], label='CIoU', color='blue', linestyle='--')
-    plt.plot(df_s['epoch'], df_s['metrics/recall(B)'], label='SIoU', color='red')
-    plt.title('Recall Convergence')
-    plt.xlabel('Epoch')
-    plt.ylabel('Recall')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    ax = axes[1, 1]
+    ax.plot(df_c['epoch'], df_c['metrics/recall(B)'], label=r'$\mathrm{CIoU}$', color='blue', linestyle='--', linewidth=1.5)
+    ax.plot(df_s['epoch'], df_s['metrics/recall(B)'], label=r'$\mathrm{SIoU}$', color='red', linewidth=1.5)
+    ax.set_title('(d) 召回率收敛曲线', fontdict=font_title, pad=10)
+    ax.set_xlabel('训练轮次', fontdict=font_label)
+    ax.set_ylabel('召回率', fontdict=font_label)
+    ax.legend(prop=prop_legend)
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(axis='both', which='major', labelsize=9)
 
     plt.tight_layout()
-    plt.savefig('iou_loss_convergence_detailed.png', dpi=300)
-    print("Detailed convergence comparison saved to iou_loss_convergence_detailed.png")
+    plt.savefig('siou_vs_ciou_convergence.png', dpi=300, bbox_inches='tight')
+    print("Detailed convergence comparison saved to siou_vs_ciou_convergence.png")
 
 if __name__ == "__main__":
     main()
