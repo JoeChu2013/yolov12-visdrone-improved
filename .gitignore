@@ -1,13 +1,28 @@
-# Python
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# =========================
+# Python / Build
+# =========================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-develop-eggs/
 dist/
+site/
 downloads/
+develop-eggs/
 eggs/
 .eggs/
 lib/
@@ -16,37 +31,87 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
+pip-wheel-metadata/
 
-# Virtual Environment
+# =========================
+# Virtual Environments
+# =========================
+.env
+.env.*
+.venv/
 venv/
 env/
 ENV/
-.env
+pythonenv*
 
-# PyCharm / VSCode
-.idea/
-.vscode/
-*.swp
+# =========================
+# Python Tool Caches
+# =========================
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.cache/
+.ipynb_checkpoints/
 
-# Datasets (Too large for GitHub)
+# =========================
+# Logs / Local Runtime Files
+# =========================
+logs/
+*.log
+*.out
+*.err
+*.pid
+
+# =========================
+# Datasets and Large Local Assets
+# =========================
 datasets/
 ultralytics/cfg/datasets/VisDrone/
 
-# Training Runs (Too large, keep logs if needed but exclude weights)
-runs/
-!runs/**/results.csv
-!runs/**/args.yaml
-!runs/**/results.png
-!runs/**/confusion_matrix.png
-# Exclude weights specifically
+# =========================
+# Model Weights / Checkpoints
+# =========================
 *.pt
 *.pth
-!yolov12n.pt # Optional: keep if small, but generally gitignore weights
+*.onnx
+*.engine
+*.tflite
+*.torchscript
 
-# Local Logs
-logs/
-*.log
+# =========================
+# Training / Experiment Runs
+# =========================
+runs/
+results/
+wandb/
+mlruns/
+lightning_logs/
+
+# =========================
+# Project Outputs
+# Keep final paper figures/tables tracked
+# Ignore temporary artifacts only
+# =========================
+outputs/temp/
+
+# =========================
+# Archives
+# =========================
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
