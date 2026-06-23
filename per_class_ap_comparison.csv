@@ -1,4 +1,0 @@
-Model,mAP@0.5,pedestrian,people,bicycle,car,van,truck,tricycle,awning-tricycle,bus,motor
-YOLOv12n (Baseline),28.32%,29.31%,24.45%,5.25%,72.72%,33.94%,22.40%,17.42%,9.01%,37.52%,31.14%
-YOLOv12n-UAV (Ours),33.74%,40.33%,32.12%,8.29%,78.19%,37.95%,26.09%,19.76%,12.69%,43.39%,38.59%
-Improvement (UAV vs Base),+5.42%,+11.02%,+7.67%,+3.04%,+5.47%,+4.01%,+3.69%,+2.34%,+3.68%,+5.87%,+7.45%

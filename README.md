@@ -6,6 +6,30 @@
 
 本仓库基于官方 `YOLOv12` 代码框架，面向 **VisDrone 无人机场景小目标检测** 进行了针对性改造，形成了本文使用的轻量化改进模型 **YOLOv12n-ACA**。仓库同时保留了训练脚本、对比实验脚本、可视化生成脚本以及论文中使用的主要图表。
 
+## 目录结构
+
+```text
+yolov12-main/
+├─ docs/                   # 对话记录、开发说明、补充结果文档
+├─ scripts/
+│  ├─ train/               # 训练脚本
+│  ├─ eval/                # 评估与分析脚本
+│  └─ plot/                # 绘图与可视化脚本
+├─ tools/                  # 数据下载、格式转换、辅助批处理
+├─ outputs/
+│  ├─ figures/
+│  │  ├─ architecture/     # 架构图、机制图、拓扑图
+│  │  ├─ dataset/          # 数据集特征与统计图
+│  │  ├─ experiments/      # 实验结果图、可视化对比图
+│  │  └─ reference/        # 参考图或标注辅助图
+│  ├─ tables/              # CSV 结果表
+│  └─ temp/                # 临时产物与中间文件
+├─ ultralytics/
+├─ requirements.txt
+├─ pyproject.toml
+└─ README.md
+```
+
 ## 项目目标
 
 无人机航拍场景中的检测任务具有以下典型难点：
@@ -23,20 +47,20 @@
 
 - 在高层特征提取阶段引入坐标注意力思想，增强空间位置信息建模能力
 - 强化小目标的局部结构响应，减轻纯语义特征对细节信息的覆盖
-- 对应可视化图：`yolov12_uav_architecture.png`、`fig_3_5_ca_backbone_flow.png`
+- 对应可视化图：`outputs/figures/architecture/yolov12_uav_architecture.png`、`outputs/figures/architecture/fig_3_5_ca_backbone_flow.png`
 
 ### 2. 非对称 BiFPN
 
 - 保留完整的自顶向下语义传递路径
 - 仅保留对微小目标最有价值的 `P2 -> P3` 自底向上回流
 - 裁剪冗余的 `P4/P5` 底向上分支，降低计算量和冗余融合
-- 对应拓扑图：`asymmetric_bifpn_topology.png`
+- 对应拓扑图：`outputs/figures/architecture/asymmetric_bifpn_topology.png`
 
 ### 3. Tiny P2/P3 Focused Detection Head
 
 - 检测头聚焦于 `P2` 与 `P3` 两个尺度
 - 重点服务 VisDrone 中占比更高的微小目标和小目标
-- 相关训练脚本：`train_tiny_p2p3.py`
+- 相关训练脚本：`scripts/train/train_tiny_p2p3.py`
 - 相关模型配置：`ultralytics/cfg/models/v12/yolov12-tiny-p2p3.yaml`
 
 ### 4. 回归与实验分析增强
@@ -44,15 +68,15 @@
 - 引入 SIoU / IoU 收敛分析脚本，对不同损失函数的优化特性进行可视化
 - 补充类别对比、热力图、失败案例、数据集统计等论文支撑材料
 - 相关脚本包括：
-  - `plot_iou_convergence.py`
-  - `generate_heatmaps.py`
-  - `generate_failure_cases.py`
-  - `generate_feature_responses.py`
-  - `dataset_statistics.py`
+  - `scripts/plot/plot_iou_convergence.py`
+  - `scripts/plot/generate_heatmaps.py`
+  - `scripts/plot/generate_failure_cases.py`
+  - `scripts/plot/generate_feature_responses.py`
+  - `scripts/plot/dataset_statistics.py`
 
 ## 主要效果
 
-`final_comprehensive_comparison.csv` 中汇总了本文模型与主流轻量化检测模型的综合对比结果：
+`outputs/tables/final_comprehensive_comparison.csv` 中汇总了本文模型与主流轻量化检测模型的综合对比结果：
 
 | 模型 | Precision | Recall | F1-Score | mAP@0.5 | Params (M) | FLOPs (G) |
 | :-- | :--: | :--: | :--: | :--: | :--: | :--: |
@@ -76,55 +100,57 @@
 
 ### 架构与机制图
 
-- `yolov12_baseline_architecture.png`
-- `yolov12_uav_architecture.png`
-- `fig_3_5_ca_backbone_flow.png`
-- `asymmetric_bifpn_topology.png`
-- `siou_vs_ciou_trajectory.png`
+- `outputs/figures/architecture/yolov12_baseline_architecture.png`
+- `outputs/figures/architecture/yolov12_uav_architecture.png`
+- `outputs/figures/architecture/fig_3_5_ca_backbone_flow.png`
+- `outputs/figures/architecture/asymmetric_bifpn_topology.png`
+- `outputs/figures/architecture/siou_vs_ciou_trajectory.png`
 
 ### 数据集与统计图
 
-- `coco_vs_visdrone_characteristics.png`
-- `visdrone_stats_1_scale.png`
-- `visdrone_stats_2_ratio.png`
-- `visdrone_stats_3_density.png`
-- `dataset_comparison_academic.png`
+- `outputs/figures/dataset/coco_vs_visdrone_characteristics.png`
+- `outputs/figures/dataset/visdrone_stats_1_scale.png`
+- `outputs/figures/dataset/visdrone_stats_2_ratio.png`
+- `outputs/figures/dataset/visdrone_stats_3_density.png`
+- `outputs/figures/dataset/dataset_comparison_academic.png`
 
 ### 训练与实验结果图
 
-- `siou_vs_ciou_convergence.png`
-- `per_class_bar_chart.png`
-- `heatmap_comparison.png`
-- `feature_responses_baseline.png`
-- `failure_modes_baseline.png`
-- `final_visual_matrix_scenario_A.png`
-- `final_visual_matrix_scenario_B.png`
-- `final_visual_matrix_scenario_C_updated.png`
-- `final_visual_matrix_scenario_D.png`
+- `outputs/figures/experiments/siou_vs_ciou_convergence.png`
+- `outputs/figures/experiments/per_class_bar_chart.png`
+- `outputs/figures/experiments/heatmap_comparison.png`
+- `outputs/figures/experiments/feature_responses_baseline.png`
+- `outputs/figures/experiments/failure_modes_baseline.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_A.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_B.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_C_updated.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_D.png`
 
 ## 关键脚本说明
 
 ### 训练与评估
 
-- `train_tiny_p2p3.py`：训练 YOLOv12n-ACA 主模型
-- `compare_sota.py`：与 YOLOv8/v9/v10/v11 等模型对比
-- `eval_coco_multiscale.py`：多尺度 COCO 指标评估
-- `convert_yolo_to_coco.py`：YOLO 检测结果转 COCO 格式
+- `scripts/train/train_tiny_p2p3.py`：训练 YOLOv12n-ACA 主模型
+- `scripts/eval/compare_sota.py`：与 YOLOv8/v9/v10/v11 等模型对比
+- `scripts/eval/eval_coco_multiscale.py`：多尺度 COCO 指标评估
+- `tools/convert_yolo_to_coco.py`：YOLO 检测结果转 COCO 格式
 
 ### 可视化与论文素材生成
 
-- `generate_visual_matrix.py`：多模型定性检测结果矩阵
-- `regenerate_scene_c_highway.py`：重生成高速公路密集车流场景 C
-- `generate_heatmaps.py`：特征热力图对比
-- `generate_feature_responses.py`：骨干特征响应图
-- `generate_failure_cases.py`：失败模式可视化
-- `plot_yolov12_base_arch.py`：基线架构图
-- `plot_yolov12_uav_arch.py`：改进架构图
-- `plot_asymmetric_bifpn_topology.py`：非对称 BiFPN 拓扑图
+- `scripts/plot/generate_visual_matrix.py`：多模型定性检测结果矩阵
+- `scripts/plot/regenerate_scene_c_highway.py`：重生成高速公路密集车流场景 C
+- `scripts/plot/generate_heatmaps.py`：特征热力图对比
+- `scripts/plot/generate_feature_responses.py`：骨干特征响应图
+- `scripts/plot/generate_failure_cases.py`：失败模式可视化
+- `scripts/plot/plot_yolov12_base_arch.py`：基线架构图
+- `scripts/plot/plot_yolov12_uav_arch.py`：改进架构图
+- `scripts/plot/plot_asymmetric_bifpn_topology.py`：非对称 BiFPN 拓扑图
 
 ## 环境安装
 
 建议使用 Python 3.11 和 CUDA 环境。
+
+以下命令默认均在项目根目录 `yolov12-main/` 下执行。
 
 ```bash
 conda create -n yolov12 python=3.11
@@ -136,7 +162,7 @@ pip install -e .
 ## 训练示例
 
 ```bash
-python train_tiny_p2p3.py
+python scripts/train/train_tiny_p2p3.py
 ```
 
 训练完成后，结果默认保存在：
@@ -157,19 +183,19 @@ runs/detect/YOLOv12-Tiny-P2P3-Focused
 ### 1. 重新生成场景 C 高速公路密集车流检测对比图
 
 ```bash
-python regenerate_scene_c_highway.py
+python scripts/plot/regenerate_scene_c_highway.py
 ```
 
 ### 2. 重新生成改进架构图
 
 ```bash
-python plot_yolov12_uav_arch.py
+python scripts/plot/plot_yolov12_uav_arch.py
 ```
 
 ### 3. 重新生成非对称 BiFPN 拓扑图
 
 ```bash
-python plot_asymmetric_bifpn_topology.py
+python scripts/plot/plot_asymmetric_bifpn_topology.py
 ```
 
 ## 仓库说明
@@ -211,6 +237,19 @@ python plot_asymmetric_bifpn_topology.py
 
 This repository is built on top of the official `YOLOv12` codebase and focuses on **small-object detection in UAV aerial imagery on VisDrone**. The final model used in the paper is named **YOLOv12n-ACA**. The repository also includes training scripts, evaluation scripts, visualization utilities, and paper-ready figures.
 
+### Repository Layout
+
+```text
+docs/                  supplementary notes and records
+scripts/train/         training scripts
+scripts/eval/          evaluation and comparison scripts
+scripts/plot/          figure generation and visualization scripts
+tools/                 converters, downloaders, and helper batches
+outputs/figures/       final paper figures grouped by type
+outputs/tables/        CSV result tables
+outputs/temp/          temporary artifacts
+```
+
 ### Project Motivation
 
 VisDrone-style UAV detection is challenging because:
@@ -226,20 +265,20 @@ VisDrone-style UAV detection is challenging because:
 
 - Coordinate-attention style enhancement is introduced in high-level feature extraction
 - Spatial position modeling is strengthened for tiny-object perception
-- Related figures: `yolov12_uav_architecture.png`, `fig_3_5_ca_backbone_flow.png`
+- Related figures: `outputs/figures/architecture/yolov12_uav_architecture.png`, `outputs/figures/architecture/fig_3_5_ca_backbone_flow.png`
 
 #### 2. Asymmetric BiFPN
 
 - The full top-down semantic pathway is preserved
 - Only the most useful bottom-up return path `P2 -> P3` is retained
 - Redundant `P4/P5` bottom-up branches are removed to reduce computation
-- Related topology figure: `asymmetric_bifpn_topology.png`
+- Related topology figure: `outputs/figures/architecture/asymmetric_bifpn_topology.png`
 
 #### 3. Tiny P2/P3 Focused Detection Head
 
 - Detection is focused on `P2` and `P3` feature levels
 - The design targets VisDrone tiny and small objects more directly
-- Training script: `train_tiny_p2p3.py`
+- Training script: `scripts/train/train_tiny_p2p3.py`
 - Model config: `ultralytics/cfg/models/v12/yolov12-tiny-p2p3.yaml`
 
 #### 4. Additional Analysis and Visualization
@@ -251,7 +290,7 @@ VisDrone-style UAV detection is challenging because:
 
 ### Main Results
 
-The overall comparison is summarized in `final_comprehensive_comparison.csv`.
+The overall comparison is summarized in `outputs/tables/final_comprehensive_comparison.csv`.
 
 | Model | Precision | Recall | F1-Score | mAP@0.5 | Params (M) | FLOPs (G) |
 | :-- | :--: | :--: | :--: | :--: | :--: | :--: |
@@ -273,33 +312,35 @@ Key takeaways:
 
 #### Architecture Figures
 
-- `yolov12_baseline_architecture.png`
-- `yolov12_uav_architecture.png`
-- `fig_3_5_ca_backbone_flow.png`
-- `asymmetric_bifpn_topology.png`
-- `siou_vs_ciou_trajectory.png`
+- `outputs/figures/architecture/yolov12_baseline_architecture.png`
+- `outputs/figures/architecture/yolov12_uav_architecture.png`
+- `outputs/figures/architecture/fig_3_5_ca_backbone_flow.png`
+- `outputs/figures/architecture/asymmetric_bifpn_topology.png`
+- `outputs/figures/architecture/siou_vs_ciou_trajectory.png`
 
 #### Dataset and Statistics
 
-- `coco_vs_visdrone_characteristics.png`
-- `visdrone_stats_1_scale.png`
-- `visdrone_stats_2_ratio.png`
-- `visdrone_stats_3_density.png`
-- `dataset_comparison_academic.png`
+- `outputs/figures/dataset/coco_vs_visdrone_characteristics.png`
+- `outputs/figures/dataset/visdrone_stats_1_scale.png`
+- `outputs/figures/dataset/visdrone_stats_2_ratio.png`
+- `outputs/figures/dataset/visdrone_stats_3_density.png`
+- `outputs/figures/dataset/dataset_comparison_academic.png`
 
 #### Experimental Visualizations
 
-- `siou_vs_ciou_convergence.png`
-- `per_class_bar_chart.png`
-- `heatmap_comparison.png`
-- `feature_responses_baseline.png`
-- `failure_modes_baseline.png`
-- `final_visual_matrix_scenario_A.png`
-- `final_visual_matrix_scenario_B.png`
-- `final_visual_matrix_scenario_C_updated.png`
-- `final_visual_matrix_scenario_D.png`
+- `outputs/figures/experiments/siou_vs_ciou_convergence.png`
+- `outputs/figures/experiments/per_class_bar_chart.png`
+- `outputs/figures/experiments/heatmap_comparison.png`
+- `outputs/figures/experiments/feature_responses_baseline.png`
+- `outputs/figures/experiments/failure_modes_baseline.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_A.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_B.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_C_updated.png`
+- `outputs/figures/experiments/final_visual_matrix_scenario_D.png`
 
 ### Installation
+
+Run the following commands from the project root `yolov12-main/`.
 
 ```bash
 conda create -n yolov12 python=3.11
@@ -311,15 +352,15 @@ pip install -e .
 ### Training
 
 ```bash
-python train_tiny_p2p3.py
+python scripts/train/train_tiny_p2p3.py
 ```
 
 ### Reproducing Key Figures
 
 ```bash
-python regenerate_scene_c_highway.py
-python plot_yolov12_uav_arch.py
-python plot_asymmetric_bifpn_topology.py
+python scripts/plot/regenerate_scene_c_highway.py
+python scripts/plot/plot_yolov12_uav_arch.py
+python scripts/plot/plot_asymmetric_bifpn_topology.py
 ```
 
 ### Acknowledgements
